@@ -28,6 +28,8 @@
     "mysql2": "^2.3.3",
     "nodemon": "^2.0.19",
     "omise": "^0.8.5",
+    "pdf-creator-node": "^2.3.5",
+    "pdf-to-printer": "^5.4.0",
     "pdfkit": "^0.13.0",
     "promptpay-js": "^1.0.6",
     "promptpay-qr": "^0.5.0",
