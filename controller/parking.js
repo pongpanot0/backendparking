@@ -74,7 +74,6 @@ const generatePayload = require("promptpay-qr");
 exports.parkcalculate = async (req, res) => {
   const id = req.params.id;
   const parking_logs_id = req.params.parking_logs_id;
-
   const end = moment(new Date()).format("yyyy-MM-DD HH:mm:ss");
   const getlog = `select * from parking_logs where parking_uuids = '${parking_logs_id}'`;
   const getset = `select * from payment where company_id = '${id}'`;
@@ -85,7 +84,6 @@ exports.parkcalculate = async (req, res) => {
       db.query(getlog, async (err, result) => {
         if (err) throw err;
         if (result) {
-
           const resultdata = result;
           var start = resultdata.map((row) => row.parking_start);
           var end = resultdata.map((row) => row.parking_end);
@@ -93,7 +91,6 @@ exports.parkcalculate = async (req, res) => {
           var duration = moment.duration(moment(start[0]).diff(moment(end[0])));
 
           var min = duration.asMinutes();
-
           db.query(getset, (err, result) => {
             if (err) throw err;
             if (result) {
@@ -113,8 +110,10 @@ exports.parkcalculate = async (req, res) => {
                 if (url) {
                   res.send({
                     status: 200,
+                    sum: data2,
                     resbody: resultdata,
                     data: url,
+                 
                   });
                 }
               });
