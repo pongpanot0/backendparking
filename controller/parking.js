@@ -71,25 +71,86 @@ function loopGetLadderTimeRate(ds, min2) {
   return sum;
 }
 const generatePayload = require("promptpay-qr");
-exports.parkcalculate = async (req, res) => {
+
+// Require the package
+
+const url = require("url");
+
+
+const conn = require("../db/mongodb");
+exports.createParkLog = async (req, res) => {
+  const event = {
+    parking_start: moment(new Date()).format("yyyy-MM-DD HH:mm:ss"),
+    parking_uuids: uuidv4(),
+    company_id: req.body.company_id,
+    success: 0,
+  };
+  await conn.connect();
+  await conn
+    .db("qrpaymnet")
+    .collection("parkingLogs")
+    .insertOne(event, async (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      if (result) {
+        const id = result.insertedId;
+        console.log(result.insertedId);
+        const option = {
+          color: {
+            dark: "#000",
+            light: "#fff",
+          },
+        };
+        url.href = `${process.env.fronend_url}/payment/${event.parking_uuids}/${event.company_id}`;
+        QRcode.toDataURL(url.href, option, async (err, url) => {
+          if (err) {
+            console.log(err);
+          }
+          if (url) {
+            await conn
+              .db("qrpaymnet")
+              .collection("parkingLogs")
+              .updateOne(
+                { _id: id },
+                {
+                  $set: { base64: url },
+                }
+              )
+              .then((result) => {
+                res.send(result);
+              });
+          }
+        });
+      }
+    });
+};
+exports.parkcalculate2 = async (req, res) => {
   const id = req.params.id;
   const parking_logs_id = req.params.parking_logs_id;
+  await conn.connect();
   const end = moment(new Date()).format("yyyy-MM-DD HH:mm:ss");
-  const getlog = `select * from parking_logs where parking_uuids = '${parking_logs_id}'`;
   const getset = `select * from payment where company_id = '${id}'`;
-  const updateSuccess = `update parking_logs set parking_end='${end}' where parking_uuids='${parking_logs_id}'`;
-  db.query(updateSuccess, async (err, result) => {
-    if (err) throw err;
-    if (result) {
-      db.query(getlog, async (err, result) => {
-        if (err) throw err;
-        if (result) {
+  const log = await conn
+    .db("qrpaymnet")
+    .collection("parkingLogs")
+    .updateOne(
+      { parking_uuids: parking_logs_id },
+      {
+        $set: { parking_end: end },
+      }
+    )
+    .then(async (result) => {
+      const log = await conn
+        .db("qrpaymnet")
+        .collection("parkingLogs")
+        .find({ parking_uuids: parking_logs_id })
+        .toArray()
+        .then((result) => {
           const resultdata = result;
           var start = resultdata.map((row) => row.parking_start);
           var end = resultdata.map((row) => row.parking_end);
-
           var duration = moment.duration(moment(start[0]).diff(moment(end[0])));
-
           var min = duration.asMinutes();
           db.query(getset, (err, result) => {
             if (err) throw err;
@@ -113,56 +174,25 @@ exports.parkcalculate = async (req, res) => {
                     sum: data2,
                     resbody: resultdata,
                     data: url,
-                 
                   });
                 }
               });
             }
           });
-        }
-      });
-    }
-  });
-};
-// Require the package
-
-const url = require("url");
-exports.createPark = async (req, res) => {
-  const parking_start = moment(new Date()).format("yyyy-MM-DD HH:mm:ss");
-  const parking_uuids = uuidv4();
-  const company_id = req.body.company_id;
-  const insert = `insert into parking_logs (parking_start,parking_uuids,company_id) value ('${parking_start}','${parking_uuids}','${company_id}')`;
-  db.query(insert, (err, result) => {
-    if (err) {
+        });
+    })
+    .catch((err) => {
       console.log(err);
-    }
-    if (result) {
-      const option = {
-        color: {
-          dark: "#000",
-          light: "#fff",
-        },
-      };
-      url.href = `${process.env.fronend_url}/payment/${parking_uuids}/${id}`;
-      QRcode.toDataURL(url.href, option, (err, url) => {
-        if (err) {
-          console.log(err);
-        }
-        if (url) {
-          const update = `update parking_logs set base64='${url}' where parking_logs_id =${result.insertId} `;
-          db.query(update, (err, result) => {
-            if (err) {
-              console.log(err);
-            }
-            if (result) {
-              res.send({
-                status: 200,
-                data: result,
-              });
-            }
-          });
-        }
-      });
-    }
+    });
+};
+exports.getParklog = async (req, res) => {
+  await conn.connect();
+  const log = await conn
+    .db("qrpaymnet")
+    .collection("parkingLogs")
+    .find()
+    .toArray();
+  res.send({
+    count: log,
   });
 };

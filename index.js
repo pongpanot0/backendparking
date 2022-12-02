@@ -7,13 +7,14 @@ require("dotenv").config();
 app.use(bodyParser.json());
 const cors = require("cors");
 app.use(cors({ origin: "*" }));
-const db = require("./db/db");
 const path = require("path");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+var filePath = path.join(__dirname, "/uploads/").split("%20").join(" ");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./pdf");
+    cb(null, filePath);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -26,7 +27,7 @@ app.use(function (req, res, next) {
 });
 app.post("/upload", upload.single("photo"), (req, res) => {
   if (req.file) {
-    res.json(req.file);
+    res.send(req.file.filename);
   } else throw "error";
 });
 app.use(
@@ -41,8 +42,8 @@ fs.readdirSync("routes").forEach(function (file) {
   var routeName = file.substr(0, file.indexOf("."));
   require("./routes/" + routeName)(app);
 });
+app.get("/display", function (req, res) {});
 
 app.listen(7301, () => {
   console.log("server start ");
 });
-
