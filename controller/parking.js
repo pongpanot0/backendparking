@@ -76,14 +76,15 @@ const generatePayload = require("promptpay-qr");
 
 const url = require("url");
 
-
 const conn = require("../db/mongodb");
 exports.createParkLog = async (req, res) => {
   const event = {
     parking_start: moment(new Date()).format("yyyy-MM-DD HH:mm:ss"),
     parking_uuids: uuidv4(),
-    company_id: req.body.company_id,
+    company_id: parseInt(req.body.company_id),
     success: 0,
+    parking_start_date: moment(new Date()).format("yyyy-MM-DD"),
+    parking_start_mouth: moment(new Date()).format("yyyy-MM"),
   };
   await conn.connect();
   await conn
@@ -137,7 +138,12 @@ exports.parkcalculate2 = async (req, res) => {
     .updateOne(
       { parking_uuids: parking_logs_id },
       {
-        $set: { parking_end: end },
+        $set: {
+          parking_end: end,
+          parking_end_date: moment(end).format("yyyy-MM-DD"),
+          parking_end_mouth: moment(end).format("yyyy-MM"),
+          parking_end_year: moment(end).format("yyyy"),
+        },
       }
     )
     .then(async (result) => {
@@ -152,7 +158,7 @@ exports.parkcalculate2 = async (req, res) => {
           var end = resultdata.map((row) => row.parking_end);
           var duration = moment.duration(moment(start[0]).diff(moment(end[0])));
           var min = duration.asMinutes();
-          db.query(getset, (err, result) => {
+          db.query(getset, async (err, result) => {
             if (err) throw err;
             if (result) {
               const data2 = loopGetLadderTimeRate(result, min);
@@ -195,4 +201,169 @@ exports.getParklog = async (req, res) => {
   res.send({
     count: log,
   });
+};
+exports.parkcalculateTest = async (req, res) => {
+  const id = req.params.id;
+  const parking_logs_id = req.params.parking_logs_id;
+  await conn.connect();
+  const end = moment(new Date()).format("yyyy-MM-DD HH:mm:ss");
+
+  const getset = `select * from payment where company_id = '${id}'`;
+  const log = await conn
+    .db("qrpaymnet")
+    .collection("parkingLogs")
+    .updateOne(
+      { parking_uuids: parking_logs_id },
+      {
+        $set: {
+          parking_end: end,
+          parking_end_date: moment(end).format("yyyy-MM-DD"),
+          parking_end_mouth: moment(end).format("yyyy-MM"),
+          parking_end_year: moment(end).format("yyyy"),
+        },
+      }
+    )
+    .then(async (result) => {
+      const log = await conn
+        .db("qrpaymnet")
+        .collection("parkingLogs")
+        .find({ parking_uuids: parking_logs_id })
+        .toArray()
+        .then((result) => {
+          const resultdata = result;
+          var start = resultdata.map((row) => row.parking_start);
+          var end = resultdata.map((row) => row.parking_end);
+          var duration = moment.duration(moment(start[0]).diff(moment(end[0])));
+          var min = duration.asMinutes();
+          db.query(getset, async (err, result) => {
+            if (err) throw err;
+            if (result) {
+              const data2 = loopGetLadderTimeRate(result, min);
+              const amount = parseInt(data2);
+              const value = parseInt(amount);
+              const mobileNmber = "1104300111810";
+              const payload = generatePayload(mobileNmber, { amount: value });
+              const option = {
+                color: {
+                  dark: "#000",
+                  light: "#fff",
+                },
+              };
+              const log = await conn
+                .db("qrpaymnet")
+                .collection("parkingLogs")
+                .updateOne(
+                  { parking_uuids: parking_logs_id },
+                  {
+                    $set: { parking_end: value },
+                  }
+                )
+                .then(async (result) => {
+                  QRcode.toDataURL(payload, option, (err, url) => {
+                    if (err) throw err;
+                    if (url) {
+                      res.send({
+                        status: 200,
+                        sum: data2,
+                        resbody: resultdata,
+                        data: url,
+                      });
+                    }
+                  });
+                });
+            }
+          });
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+exports.Parksumcalculator = async (req, res) => {
+  const id = req.params.id;
+  const log = await conn
+    .db("qrpaymnet")
+    .collection("parkingLogs")
+    .aggregate([
+      // First Stage
+      {
+        $match: { company_id: parseInt(id) },
+      },
+      {
+        $group: {
+          _id: "$parking_start_mouth",
+          totalSaleAmount: { $sum: { $multiply: ["$totalSum"] } },
+        },
+      },
+      { $sort: { _id: 1 } },
+      // Second Stage
+    ])
+    .toArray()
+    .then((result) => {
+      res.send({
+        status: 200,
+        data: result,
+      });
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        data: err,
+      });
+    });
+};
+exports.Parkcountlogs = async (req, res) => {
+  const id = req.params.id;
+  const log = await conn
+    .db("qrpaymnet")
+    .collection("parkingLogs")
+    .aggregate([
+      // First Stage
+      {
+        $match: { company_id: parseInt(id) },
+      },
+      {
+        $group: {
+          _id: "$parking_start_mouth",
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+      // Second Stage
+    ])
+    .toArray()
+    .then((result) => {
+      res.send({
+        status: 200,
+        data: result,
+      });
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        data: err,
+      });
+    });
+};
+exports.ParkLike = async (req, res) => {
+  const id = req.params.id;
+  const lcplate = req.body.lcplate;
+  const log = await conn
+    .db("qrpaymnet")
+    .collection("parkingLogs")
+    .find({ lcplate: lcplate, company_id: parseInt(id) })
+    .toArray()
+    .then((result) => {
+      res.send({
+        status: 200,
+        data: result,
+      });
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        data: err,
+      });
+    });
 };

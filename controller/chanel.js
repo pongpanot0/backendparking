@@ -31,8 +31,8 @@ exports.getMasterChanel = async (req, res) => {
   });
 };
 exports.getChanelPayments = async (req, res) => {
-  const id = req.params.id
-  const get = `select * from chanel_payments where company_id = ${id}`;
+  const id = req.params.id;
+  const get = `select cp.*,c.* from chanel_payments cp left outer join chanel c ON (cp.chanel_id=c.chanel_id)  where cp.company_id = ${id} `;
   db.query(get, (err, result) => {
     if (err) {
       console.log(err);
