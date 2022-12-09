@@ -72,7 +72,6 @@ exports.exportParkExcel = async (req, res) => {
 };
 exports.exportSelectDateParkExcel = async (req, res) => {
   let id = req.params.id;
-
   const parking_start_date_first = moment(
     req.body.parking_start_date_first
   ).format("yyyy-MM-DD");

@@ -1,4 +1,4 @@
-const db = require("../db/db");
+
 const conn = require("../db/mongodb");
 const moment = require("moment");
 exports.createTheme = async (req, res) => {
@@ -12,14 +12,16 @@ exports.createTheme = async (req, res) => {
     updated_at: moment(new Date()).format("yyyy-MM-DD"),
     updated_by: req.body.updated_by,
   };
-  console.log(event);
   await conn.connect();
   await conn
     .db("qrpaymnet")
     .collection("theme")
     .insertOne(event, async (err, result) => {
       if (err) {
-        console.log(err);
+        res.send({
+          status: 400,
+          data: err,
+        });
       }
       if (result) {
         res.send({
@@ -45,9 +47,9 @@ exports.getTheme = async (req, res) => {
       });
     })
     .catch((err) => {
-        res.send({
-            status: 400,
-            data: err,
-          });
+      res.send({
+        status: 400,
+        data: err,
+      });
     });
 };

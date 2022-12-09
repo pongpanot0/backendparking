@@ -83,6 +83,7 @@ exports.createParkLog = async (req, res) => {
     parking_uuids: uuidv4(),
     company_id: parseInt(req.body.company_id),
     success: 0,
+    totalSum: 0,
     parking_start_date: moment(new Date()).format("yyyy-MM-DD"),
     parking_start_mouth: moment(new Date()).format("yyyy-MM"),
   };
@@ -209,7 +210,8 @@ exports.parkcalculateTest = async (req, res) => {
   const parking_logs_id = req.params.parking_logs_id;
   await conn.connect();
   const end = moment(new Date()).format("yyyy-MM-DD HH:mm:ss");
-
+  const firstvalue = [];
+  const sum = [];
   const getset = `select * from payment where company_id = '${id}'`;
   const log = await conn
     .db("qrpaymnet")
@@ -232,6 +234,7 @@ exports.parkcalculateTest = async (req, res) => {
         .find({ parking_uuids: parking_logs_id })
         .toArray()
         .then((result) => {
+          const totalSum = result[0].totalSum;
           const resultdata = result;
           var start = resultdata.map((row) => row.parking_start);
           var end = resultdata.map((row) => row.parking_end);
@@ -241,7 +244,9 @@ exports.parkcalculateTest = async (req, res) => {
             if (err) throw err;
             if (result) {
               const data2 = loopGetLadderTimeRate(result, min);
-              const amount = parseInt(data2);
+              firstvalue.push(data2);
+              console.log(firstvalue);
+              const amount = parseInt(data2 - totalSum);
               const value = parseInt(amount);
               const mobileNmber = "1104300111810";
               const payload = generatePayload(mobileNmber, { amount: value });
@@ -257,7 +262,9 @@ exports.parkcalculateTest = async (req, res) => {
                 .updateOne(
                   { parking_uuids: parking_logs_id },
                   {
-                    $set: { parking_end: value },
+                    $set: {
+                      parking_end: end[0],
+                    },
                   }
                 )
                 .then(async (result) => {
@@ -279,6 +286,43 @@ exports.parkcalculateTest = async (req, res) => {
     })
     .catch((err) => {
       console.log(err);
+    })
+    .finally((es) => {
+      setTimeout(async function () {
+        const log = await conn
+          .db("qrpaymnet")
+          .collection("parkingLogs")
+          .find({ parking_uuids: parking_logs_id })
+          .toArray()
+          .then(async (result) => {
+            if (result[0].out == 0 && result[0].paid == 1) {
+              console.log('update')
+              const end = moment(new Date()).format("yyyy-MM-DD HH:mm:ss");
+              const log = await conn
+                .db("qrpaymnet")
+                .collection("parkingLogs")
+                .updateOne(
+                  { parking_uuids: parking_logs_id },
+                  {
+                    $set: {
+                      parking_end2: end,
+                      totalSum: firstvalue[0],
+                    },
+                  }
+                )
+                .then(async (result) => {})
+                .catch((err) => {
+                  console.log(err);
+                });
+            }
+            if (result[0].out == 1 && result[0].paid == 1) {
+              console.log("555");
+              return;
+            } else {
+              return;
+            }
+          });
+      }, 1 * 60000);
     });
 };
 

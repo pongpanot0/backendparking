@@ -38,7 +38,7 @@ exports.getMasterChanel = async (req, res) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      res.send(err);
     });
 };
 exports.getChanelPayments = async (req, res) => {
@@ -48,6 +48,7 @@ exports.getChanelPayments = async (req, res) => {
     .db("qrpaymnet")
     .collection("chanel_payments")
     .aggregate([
+      { $match: { company_id: parseInt(id) } },
       {
         $lookup: {
           from: "chanel",
@@ -56,7 +57,7 @@ exports.getChanelPayments = async (req, res) => {
           as: "chanel",
         },
       },
-      { $unwind: "$chanel" }
+      { $unwind: "$chanel" },
     ])
     .toArray()
     .then((result) => {
