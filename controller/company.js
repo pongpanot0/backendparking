@@ -1,39 +1,55 @@
-const db = require("../db/db");
+
 const fs = require("fs");
+const conn = require("../db/mongodb");
 exports.get = async (req, res) => {
   const id = req.params.id;
-  const getdata = `select * from company where company_id = ${id}`;
-  db.query(getdata, (err, result) => {
-    if (err) {
-      console.log(err);
-    }
-    if (result) {
+  const log = await conn
+    .db("qrpaymnet")
+    .collection("company")
+    .find(
+      { company_id: parseInt(id) },
+    )
+    .toArray()
+    .then(async (result) => {
       res.send({
         status: 200,
         data: result,
       });
-    }
-  });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
 };
 
 exports.update = async (req, res) => {
   const id = req.params.id;
   const company_pic = req.body.company_pic;
   const company_name = req.body.company_name;
-
-  const getdata = `update company set company_name='${company_name}',company_pic='${company_pic}'  where company_id = ${id}`;
-  db.query(getdata, (err, result) => {
-    if (err) {
-      console.log(err);
-    }
-    if (result) {
-      console.log(result);
+  const company_lots = req.body.company_lots;
+  await conn.connect();
+  const log = await conn
+    .db("qrpaymnet")
+    .collection("company")
+    .updateOne(
+      { company_id: parseInt(id) },
+      {
+        $set: {
+          company_name: company_name,
+          company_pic: company_pic,
+          company_lots:company_lots,
+        },
+      }
+    )
+    .then(async (result) => {
       res.send({
         status: 200,
         data: result,
       });
-    }
-  });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 exports.display = async (req, res) => {
   const id = req.params.id;

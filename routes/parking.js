@@ -6,4 +6,6 @@ module.exports = function (app) {
   app.get("/Parksumcalculator/:id", parking.Parksumcalculator);
   app.get("/Parkcountlogs/:id", parking.Parkcountlogs);
   app.post("/ParkLike/:id", parking.ParkLike);
+  app.get("/ParkIn/:id", parking.ParkIn);
+  
 };

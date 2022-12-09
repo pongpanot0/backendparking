@@ -1,24 +1,29 @@
 const db = require("../db/db");
-function insertsettingpayment(req, res) {
-  const HFrom = req.payment_hourfist;
-  const MFrom = req.payment_minfirst;
-  const Hto = req.payment_hour;
-  const Mto = req.payment_min;
-  const ValueCharge = req.payment_free;
-  const IsForwordRate = req.payment_forward;
-  const company_id = req.company_id;
-
-  const insert = `insert into setting_payment (HFrom,MFrom,Hto,Mto,ValueCharge,IsForwordRate,company_id) value ('${HFrom}','${MFrom}','${Hto}','${Mto}','${ValueCharge}','${IsForwordRate}','${company_id}')`;
-  db.query(insert, (err, result) => {
-    if (err) {
-      console.log(err);
-    }
-    if (result) {
-      return {
-        payment: result,
-      };
-    }
-  });
+const conn = require("../db/mongodb");
+async function insertsettingpayment(req, res) {
+  const event = {
+    HFrom: req.payment_hourfist,
+    MFrom: req.payment_minfirst,
+    Hto: req.payment_hour,
+    Mto: req.payment_min,
+    ValueCharge: req.payment_free,
+    IsForwordRate: req.payment_forward,
+    company_id: parseInt(req.company_id),
+  };
+  await conn.connect();
+  await conn
+    .db("qrpaymnet")
+    .collection("setting_payment")
+    .insertOne(event, async (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      if (result) {
+        return {
+          payment: result,
+        };
+      }
+    });
 }
 exports.insert = async (req, res) => {
   const totalminfirst =
@@ -45,37 +50,45 @@ exports.insert = async (req, res) => {
   if (req.body.payment_forward !== true) {
     payment_forward.push(0);
   }
-  const insert = `insert into payment (free,payment_min,company_id,payment_free,payment_forward) value ('${
-    free[0]
-  }','${parseInt(payment_min)}','${company_id}','${payment_free}','${
-    payment_forward[0]
-  }')`;
-  db.query(insert, (err, result) => {
-    if (err) {
-      console.log(err);
-    }
-    if (result) {
-      res.send({
-        status: 200,
-        data: insertsettingpayment(req.body),
-        result: result,
-      });
-    }
-  });
+  const event = {
+    free: free[0],
+    payment_min: payment_min,
+    company_id: parseInt(company_id),
+    payment_free: payment_free,
+    payment_forward: payment_forward[0],
+  };
+  await conn.connect();
+  await conn
+    .db("qrpaymnet")
+    .collection("payment")
+    .insertOne(event, async (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      if (result) {
+        res.send({
+          status: 200,
+          data: insertsettingpayment(req.body),
+          result: result,
+        });
+      }
+    });
 };
 
 exports.get = async (req, res) => {
   const id = req.params.id;
-  const get = `select * from setting_payment where company_id = '${id}'`;
-  db.query(get, (err, result) => {
-    if (err) {
-      console.log(err);
-    }
-    if (result) {
+  await conn.connect();
+  await conn
+    .db("qrpaymnet")
+    .collection("setting_payment")
+    .find({ company_id: parseInt(id) })
+    .toArray()
+    .then((result) => {
       res.send({
         status: 200,
         data: result,
       });
-    }
-  });
+    }).catch((err)=>{
+      console.log(err)
+    })
 };

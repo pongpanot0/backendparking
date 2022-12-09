@@ -131,7 +131,6 @@ exports.parkcalculate2 = async (req, res) => {
   const parking_logs_id = req.params.parking_logs_id;
   await conn.connect();
   const end = moment(new Date()).format("yyyy-MM-DD HH:mm:ss");
-  const getset = `select * from payment where company_id = '${id}'`;
   const log = await conn
     .db("qrpaymnet")
     .collection("parkingLogs")
@@ -152,15 +151,19 @@ exports.parkcalculate2 = async (req, res) => {
         .collection("parkingLogs")
         .find({ parking_uuids: parking_logs_id })
         .toArray()
-        .then((result) => {
+        .then(async (result) => {
           const resultdata = result;
           var start = resultdata.map((row) => row.parking_start);
           var end = resultdata.map((row) => row.parking_end);
           var duration = moment.duration(moment(start[0]).diff(moment(end[0])));
           var min = duration.asMinutes();
-          db.query(getset, async (err, result) => {
-            if (err) throw err;
-            if (result) {
+
+          const log = await conn
+            .db("qrpaymnet")
+            .collection("payment")
+            .find({ company_id: parseInt(id) })
+            .toArray()
+            .then((result) => {
               const data2 = loopGetLadderTimeRate(result, min);
               const amount = parseInt(data2);
               const value = parseInt(amount);
@@ -183,8 +186,7 @@ exports.parkcalculate2 = async (req, res) => {
                   });
                 }
               });
-            }
-          });
+            });
         });
     })
     .catch((err) => {
@@ -353,6 +355,39 @@ exports.ParkLike = async (req, res) => {
     .db("qrpaymnet")
     .collection("parkingLogs")
     .find({ lcplate: lcplate, company_id: parseInt(id) })
+    .toArray()
+    .then((result) => {
+      res.send({
+        status: 200,
+        data: result,
+      });
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        data: err,
+      });
+    });
+};
+
+exports.ParkIn = async (req, res) => {
+  const id = req.params.id;
+  const log = await conn
+    .db("qrpaymnet")
+    .collection("parkingLogs")
+    .aggregate([
+      // First Stage
+      {
+        $match: { company_id: parseInt(id), out: 0 },
+      },
+      {
+        $group: {
+          _id: "$out",
+          count: { $sum: 1 },
+        },
+      },
+      // Second Stage
+    ])
     .toArray()
     .then((result) => {
       res.send({

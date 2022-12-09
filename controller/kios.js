@@ -1,14 +1,13 @@
-
 const conn = require("../db/mongodb");
-exports.createcamera = async (req, res) => {
+exports.createKios = async (req, res) => {
   const event = {
-    camera_ip: req.body.camera_ip,
+    kios_macaddress: req.body.kios_macaddress,
     company_id: parseInt(req.body.company_id),
   };
   await conn.connect();
   await conn
     .db("qrpaymnet")
-    .collection("camerasetting")
+    .collection("kiossetting")
     .insertOne(event, async (err, result) => {
       if (err) {
         console.log(err);
@@ -21,15 +20,16 @@ exports.createcamera = async (req, res) => {
       }
     });
 };
-exports.getcamera = async (req, res) => {
-  const id = req.params.id
+exports.getKios = async (req, res) => {
+  const id = req.params.id;
   await conn.connect();
   await conn
     .db("qrpaymnet")
-    .collection("camerasetting")
+    .collection("kiossetting")
     .find({ company_id: parseInt(id) })
     .toArray()
     .then((result) => {
+     
       res.send({
         status: 200,
         data: result,
