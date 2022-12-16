@@ -42,9 +42,9 @@ fs.readdirSync("routes").forEach(function (file) {
   var routeName = file.substr(0, file.indexOf("."));
   require("./routes/" + routeName)(app);
 });
-const moment = require('moment')
+const moment = require("moment");
 app.get("/display", function (req, res) {});
-moment.locale('th')
+moment.locale("th");
 app.listen(7301, () => {
   console.log("server start ");
 });

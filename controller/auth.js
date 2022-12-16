@@ -1,55 +1,133 @@
 const db = require("../db/db");
 const bcrypt = require("bcryptjs");
+const conn = require("../db/mongodb");
 const jwt = require("jsonwebtoken");
+const moment = require("moment");
 exports.register = async (req, res) => {
-  let user_name = req.body.user_name;
-  let created_by = req.body.created_by;
-  let created_at = moment(new Date()).format("YYYY-MM-DD HH:mm");
-  let updated_by = req.body.updated_by;
-  let updated_at = moment(new Date()).format("YYYY-MM-DD HH:mm");
-  let company_name = req.body.company_name;
-  let count = `SELECT COUNT(user_name)  AS name2 FROM users WHERE user_name='${user_name}'`;
-  db.query(count, async (err, result) => {
-    if (err) {
-      console.log(err);
-    }
-    if (result[0].name2 >= 1) {
-      res.send("มีUsername นี่อยู่แล้ว");
-    }
-    if (result[0].name2 == 0) {
-      let createcompany = `insert into company (company_name,created_by,created_at,updated_by,updated_at) values('${company_name}','${created_by}','${created_at}','${updated_by}','${updated_at}')`;
-      db.query(createcompany, (err, result) => {
-        if (err) {
-          console.log(err);
-        }
-        if (result) {
-          let company_id = result.insertId;
-          bcrypt.hash(req.body.password, 10, (err, hash) => {
+  await conn.connect();
+  await conn
+    .db("qrpaymnet")
+    .collection("users")
+    .find({ user_name: req.body.user_name })
+    .count()
+    .then(async (result) => {
+      console.log(result);
+      if (result > 0) {
+        res.send({
+          data: 400,
+          result: "มีUsername อยุ่แล้ว",
+        });
+      }
+      if (result <= 0) {
+        const event = {
+          company_name: req.body.company_name,
+          company_lots: req.body.company_lots,
+          timeReamain: parseInt(req.body.timeReamain),
+          company_pic: "1670813031869.png",
+          created_by: req.body.created_by,
+          created_at: moment(new Date()).format("YYYY-MM-DD HH:mm"),
+        };
+        await conn
+          .db("qrpaymnet")
+          .collection("company")
+          .insertOne(event, async (err, result) => {
             if (err) {
               console.log(err);
             }
-            if (hash) {
-              let create = `INSERT INTO users (user_name,user_password,created_by,created_at,updated_at,updated_by,company_id)  VALUES ('${user_name}','${hash}','${created_by}','${created_at}','${updated_by}','${updated_at}','${company_id}')`;
-              db.query(create, (err, result) => {
+            if (result) {
+              bcrypt.hash(req.body.user_password, 10, async (err, hash) => {
                 if (err) {
                   console.log(err);
                 }
-                if (result) {
-                  res.send({
-                    status: 200,
-                    data: result,
-                  });
+                if (hash) {
+                  const event = {
+                    user_name: req.body.user_name,
+                    created_by: req.body.created_by,
+                    created_at: moment(new Date()).format("YYYY-MM-DD HH:mm"),
+                    company_id: result.insertedId,
+                    user_password: hash,
+                  };
+
+                  await conn
+                    .db("qrpaymnet")
+                    .collection("users")
+                    .insertOne(event, async (err, result) => {
+                      if (err) {
+                        console.log(err);
+                      }
+                      if (result) {
+                        res.send({
+                          status: 200,
+                          data: result,
+                        });
+                      }
+                    });
                 }
               });
             }
           });
-        }
-      });
-    }
-  });
+      }
+    });
 };
-
 exports.login = async (req, res) => {
+  console.log(1);
+  let user_name = req.body.user_name;
+  await conn.connect();
+  await conn
+    .db("qrpaymnet")
+    .collection("users")
+    .find({ user_name: user_name })
+    .toArray()
+    .then(async (result) => {
+      console.log('====================================');
+      console.log(result);
+      console.log('====================================');
+      if (result[0] == [] || result[0] == null) {
+        res.send({
+          data: 400,
+          result: "มีUsername อยุ่แล้ว",
+        });
+      }
+      if (result[0] !== [] || result[0] !== null) {
+        bcrypt.compare(
+          req.body.user_password,
+          result[0]["user_password"],
+          (bErr, bResult) => {
+            if (bErr) {
+              return res.status(401).send({
+                msg: "Email or password is incorrect!",
+              });
+            }
+            if (bResult) {
+              const token = jwt.sign(
+                {
+                  user_id: result[0]._id,
+                  user_name: result[0].user_name,
+                  company_id: result[0].company_id,
+                },
+                "zuHbAry/7IrrSQaynzj4c8i8n1iO+CCqzdyeXgRNlfDdQBUJcX9yrYGc98fqp169/ELDSLwtvzebeQ0nf6WkOiXUhOdStRMhPykd/nJwEdmENXThvX9Map7k1gwvXvciZ48DYVc7nntfN82k+ZXSRX2+rTN8YEK3S7tP/0csBYdQwB6OS5FzMHM1gQvK3VX4QAlC6nDbvLsYOBqZcYsDlvlL/Uglw57wNNpLfwjQQC+zXBFvGnROVNLh//yyBl1kB+YmIZXrnkrUkNbLm7QteW+6nXUWZ1gQOEatjCr9NnYxaY4Ve0QABq0sHzifZ65Bz4HVFptun97VS4LSTJmxeQ==",
+                
+              );
+            
+              res.send({
+                status: 200,
+                name: result[0].user_name,
+                email:result[0].user_name,
+                accessToken: token,
+                user: result,
+              });
+            } else {
+              return res.send({
+                status: 400,
+                message: "ชื่อหรือรหัสผ่านไม่ถูกต้อง",
+              });
+            }
+          }
+        );
+      }
+    });
+};
+/* exports.login = async (req, res) => {
   let user_name = req.body.user_name;
   db.query(
     `select * from users  WHERE user_name = '${user_name}' and inactive = 0`,
@@ -62,7 +140,7 @@ exports.login = async (req, res) => {
         return;
       }
       if (result[0] === null || result[0] === [] || result[0] === undefined) {
-        console.log('1234')
+        console.log("1234");
         res.send({
           status: 400,
           message: "ชื่อหรือรหัสผ่านไม่ถูกต้อง",
@@ -113,3 +191,4 @@ exports.login = async (req, res) => {
     }
   );
 };
+ */

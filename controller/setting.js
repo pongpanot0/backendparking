@@ -8,7 +8,7 @@ async function insertsettingpayment(req, res) {
     Mto: req.payment_min,
     ValueCharge: req.payment_free,
     IsForwordRate: req.payment_forward,
-    company_id: parseInt(req.company_id),
+    company_id: req.company_id,
   };
   await conn.connect();
   await conn
@@ -53,7 +53,7 @@ exports.insert = async (req, res) => {
   const event = {
     free: free[0],
     payment_min: payment_min,
-    company_id: parseInt(company_id),
+    company_id: company_id,
     payment_free: payment_free,
     payment_forward: payment_forward[0],
   };
@@ -81,14 +81,16 @@ exports.get = async (req, res) => {
   await conn
     .db("qrpaymnet")
     .collection("setting_payment")
-    .find({ company_id: parseInt(id) })
+    .find({ company_id: id})
     .toArray()
     .then((result) => {
       res.send({
         status: 200,
         data: result,
       });
-    }).catch((err)=>{
-      console.log(err)
     })
+    .catch((err) => {
+      console.log(err);
+    });
 };
+

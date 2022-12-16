@@ -6,7 +6,7 @@ exports.createChanel = async (req, res) => {
     chanel_payments_name: req.body.chanel_payments_name,
     chanel_payments_tax: req.body.chanel_payments_tax,
     chanel_id: req.body.chanel_id,
-    company_id: parseInt(req.body.company_id),
+    company_id: req.body.company_id,
   };
   await conn.connect();
   await conn
@@ -48,7 +48,7 @@ exports.getChanelPayments = async (req, res) => {
     .db("qrpaymnet")
     .collection("chanel_payments")
     .aggregate([
-      { $match: { company_id: parseInt(id) } },
+      { $match: { company_id: id } },
       {
         $lookup: {
           from: "chanel",

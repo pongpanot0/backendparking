@@ -5,5 +5,7 @@ module.exports = function (app) {
   app.post("/exportParkExcel/:id", exportlogs.exportParkExcel);
   app.post("/exportSelectDateParkExcel/:id", exportlogs.exportSelectDateParkExcel);
   app.post("/exportSelectTimeParkExcel/:id", exportlogs.exportSelectTimeParkExcel);
+  app.get("/testpdf", exportlogs.testpdf);
+  app.get("/getPrinters", exportlogs.getPrinters);
   
   }

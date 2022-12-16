@@ -1,9 +1,16 @@
 
 const conn = require("../db/mongodb");
+const { v4: uuidv4 } = require("uuid");
 exports.createcamera = async (req, res) => {
   const event = {
     camera_ip: req.body.camera_ip,
-    company_id: parseInt(req.body.company_id),
+    company_id: req.body.company_id,
+    wiegandID:req.body.wiegandID,
+    in_out_type:req.body.in_out_type,
+    doornum:req.body.doornum,
+    camera_name:req.body.camera_name,
+    camera_port:req.body.camera_port,
+    camera_uuid:uuidv4()
   };
   await conn.connect();
   await conn
@@ -27,7 +34,7 @@ exports.getcamera = async (req, res) => {
   await conn
     .db("qrpaymnet")
     .collection("camerasetting")
-    .find({ company_id: parseInt(id) })
+    .find({ company_id: id })
     .toArray()
     .then((result) => {
       res.send({

@@ -1,0 +1,31 @@
+<div
+  style="
+    margin: auto;
+    width: 50%;
+    border: 3px solid green;
+    padding: 10px;
+    text-align: center;
+  "
+>
+  <h1>ชื่อบริษัท</h1>
+  <div>
+    <img src="<%= rows[0].Qrcode %> " width="200px" height="auto">
+    <h3>แสกน QR นี้ เพื่อชำระค่าจอดรถ</h3>
+    <h4>Please Scan this QR for Payment</h4>
+    <h1>บัตรจอดรถ</h1>
+    <h1>Parking Ticket</h1>
+    <% for (var i = 0; i < rows.length; i++) { %>
+    <h4>Date <%= rows[i].Date %> : Time <%= rows[i].Time %>:</h4>
+
+    <% } %>
+
+    <h5>วิธีชำระค่าบริการจอดรถ :</h5>
+    <p>1. Scan QR Code ที่บัตรจอดรถเพื่อชำระค่าบริการผ่าน Mobile Payment</p>
+    <p>2. เครื่องรับชำระค่าจิดรถอิเล็คทรอนิกส์ (Kiosk E-Payment)</p>
+    <p>3. ชำระด้วยเงินสด</p>
+    <h5>* กรณีบัตรหาย มีค่าปรับ 200.-</h5>
+    <p>
+      * กรุณาเก็บรักษาบัตรจอดรถ กรณีบัตรหาย กรูณฯติดต่อ เคาน์เตอร์ประชาสัมพันธ์
+    </p>
+  </div>
+</div>

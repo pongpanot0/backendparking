@@ -5,7 +5,7 @@ exports.createTheme = async (req, res) => {
   const event = {
     paimaryButton: req.body.paimaryButton,
     errorButton: req.body.errorButton,
-    company_id: parseInt(req.body.company_id),
+    company_id: req.body.company_id,
     inactive: 0,
     created_at: moment(new Date()).format("yyyy-MM-DD"),
     created_by: req.body.created_by,
@@ -38,7 +38,7 @@ exports.getTheme = async (req, res) => {
   await conn
     .db("qrpaymnet")
     .collection("theme")
-    .find({ company_id: parseInt(id) })
+    .find({ company_id: id })
     .toArray()
     .then((result) => {
       res.send({

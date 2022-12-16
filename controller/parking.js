@@ -1,32 +1,7 @@
 const db = require("../db/db");
 const moment = require("moment");
 const { v4: uuidv4 } = require("uuid");
-exports.parking = async (req, res) => {
-  const parking_logs_id = req.params.parking_logs_id;
-  const getdata = `select * from parking_logs where parking_logs_id='${parking_logs_id}'`;
-  db.query(getdata, (err, result) => {
-    if (err) {
-      res.send(err);
-    }
-    if (result) {
-      res.send(result);
-    }
-  });
-};
-
-exports.calpark = async (req, res) => {
-  const company_id = req.params.company_id;
-  const getSet = `select * from setting_payment where company_id=${company_id}`;
-  db.query(getSet, (err, result) => {
-    if (err) {
-      console.log(err);
-    }
-    if (result) {
-      res.send(result);
-    }
-  });
-};
-
+const axios = require('axios')
 const QRcode = require("qrcode");
 
 function loopGetLadderTimeRate(ds, min2) {
@@ -78,15 +53,28 @@ const url = require("url");
 
 const conn = require("../db/mongodb");
 exports.createParkLog = async (req, res) => {
+  console.log(req.body[0]["SN"]);
+  company_id = []
+  await conn.connect();
+  await conn
+    .db("qrpaymnet")
+    .collection("kiossetting")
+    .find({ kios_serailNum: "253203810" })
+    .toArray()
+    .then((result)=>{
+      company_id.push(result[0].company_id)
+    
+    })
   const event = {
     parking_start: moment(new Date()).format("yyyy-MM-DD HH:mm:ss"),
     parking_uuids: uuidv4(),
-    company_id: parseInt(req.body.company_id),
+    company_id: company_id[0],
     success: 0,
     totalSum: 0,
     parking_start_date: moment(new Date()).format("yyyy-MM-DD"),
     parking_start_mouth: moment(new Date()).format("yyyy-MM"),
   };
+
   await conn.connect();
   await conn
     .db("qrpaymnet")
@@ -97,7 +85,6 @@ exports.createParkLog = async (req, res) => {
       }
       if (result) {
         const id = result.insertedId;
-        console.log(result.insertedId);
         const option = {
           color: {
             dark: "#000",
@@ -120,7 +107,26 @@ exports.createParkLog = async (req, res) => {
                 }
               )
               .then((result) => {
-                res.send(result);
+                const data = {
+                  jsonrpc: "2.0",
+                  method: "远程开门",
+                  params: [
+                    {
+                      设备序列号:req.body[0]["SN"],
+                      门号: 1,
+                    },
+                  ],
+                  id: 0,
+                };
+                axios({
+                  url: `http://119.59.97.193:61080`, //your url
+                  method: "POST",
+                  data: data,
+                }).then((res) => {
+                  console.log(res.data);
+                  return
+                });
+             /*    res.send(result); */
               });
           }
         });
@@ -162,7 +168,7 @@ exports.parkcalculate2 = async (req, res) => {
           const log = await conn
             .db("qrpaymnet")
             .collection("payment")
-            .find({ company_id: parseInt(id) })
+            .find({ company_id: id })
             .toArray()
             .then((result) => {
               const data2 = loopGetLadderTimeRate(result, min);
@@ -193,6 +199,17 @@ exports.parkcalculate2 = async (req, res) => {
     .catch((err) => {
       console.log(err);
     });
+};
+exports.testgetpark = async (req, res) => {
+  await conn.connect();
+  const log = await conn
+    .db("qrpaymnet")
+    .collection("parkingLogs")
+    .find()
+    .toArray();
+  res.send({
+    count: log,
+  });
 };
 exports.getParklog = async (req, res) => {
   await conn.connect();
@@ -231,9 +248,24 @@ exports.parkcalculateTest = async (req, res) => {
       const log = await conn
         .db("qrpaymnet")
         .collection("parkingLogs")
-        .find({ parking_uuids: parking_logs_id })
+        .aggregate([
+          { $match: { parking_uuids: parking_logs_id } },
+          {
+            $lookup: {
+              from: "company",
+              localField: "company_id",
+              foreignField: "company_id",
+              as: "company",
+            },
+          },
+        ])
+
         .toArray()
         .then((result) => {
+          time = [];
+          const timeReamain = result[0].company[0].timeReamain;
+          time.push(timeReamain);
+          const firstvalue2 = result[0].firstvalue;
           const totalSum = result[0].totalSum;
           const resultdata = result;
           var start = resultdata.map((row) => row.parking_start);
@@ -245,8 +277,7 @@ exports.parkcalculateTest = async (req, res) => {
             if (result) {
               const data2 = loopGetLadderTimeRate(result, min);
               firstvalue.push(data2);
-              console.log(firstvalue);
-              const amount = parseInt(data2 - totalSum);
+              const amount = parseInt(data2);
               const value = parseInt(amount);
               const mobileNmber = "1104300111810";
               const payload = generatePayload(mobileNmber, { amount: value });
@@ -273,7 +304,7 @@ exports.parkcalculateTest = async (req, res) => {
                     if (url) {
                       res.send({
                         status: 200,
-                        sum: data2,
+                        sum: amount,
                         resbody: resultdata,
                         data: url,
                       });
@@ -296,7 +327,18 @@ exports.parkcalculateTest = async (req, res) => {
           .toArray()
           .then(async (result) => {
             if (result[0].out == 0 && result[0].paid == 1) {
-              console.log('update')
+              const lineNotify = require("line-notify-nodejs")(
+                "n7XJ8s06pxupAvKm5RpVtLQqPuYKnVtHb35iLOYzNSg"
+              );
+
+              lineNotify
+                .notify({
+                  message: "send test",
+                })
+                .then(() => {
+                  console.log("send completed!");
+                });
+              console.log("update");
               const end = moment(new Date()).format("yyyy-MM-DD HH:mm:ss");
               const log = await conn
                 .db("qrpaymnet")
@@ -307,6 +349,11 @@ exports.parkcalculateTest = async (req, res) => {
                     $set: {
                       parking_end2: end,
                       totalSum: firstvalue[0],
+                    },
+                  },
+                  {
+                    $add: {
+                      firstvalue: 50,
                     },
                   }
                 )
@@ -322,7 +369,7 @@ exports.parkcalculateTest = async (req, res) => {
               return;
             }
           });
-      }, 1 * 60000);
+      }, time[0] * 60);
     });
 };
 
@@ -334,7 +381,7 @@ exports.Parksumcalculator = async (req, res) => {
     .aggregate([
       // First Stage
       {
-        $match: { company_id: parseInt(id) },
+        $match: { company_id: id },
       },
       {
         $group: {
@@ -367,7 +414,7 @@ exports.Parkcountlogs = async (req, res) => {
     .aggregate([
       // First Stage
       {
-        $match: { company_id: parseInt(id) },
+        $match: { company_id: id },
       },
       {
         $group: {
@@ -398,7 +445,7 @@ exports.ParkLike = async (req, res) => {
   const log = await conn
     .db("qrpaymnet")
     .collection("parkingLogs")
-    .find({ lcplate: lcplate, company_id: parseInt(id) })
+    .find({ lcplate: lcplate, company_id: id })
     .toArray()
     .then((result) => {
       res.send({
@@ -416,13 +463,14 @@ exports.ParkLike = async (req, res) => {
 
 exports.ParkIn = async (req, res) => {
   const id = req.params.id;
+  console.log(id);
   const log = await conn
     .db("qrpaymnet")
     .collection("parkingLogs")
     .aggregate([
       // First Stage
       {
-        $match: { company_id: parseInt(id), out: 0 },
+        $match: { company_id: id, out: 0 },
       },
       {
         $group: {
@@ -434,6 +482,7 @@ exports.ParkIn = async (req, res) => {
     ])
     .toArray()
     .then((result) => {
+      console.log(result);
       res.send({
         status: 200,
         data: result,

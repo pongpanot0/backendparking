@@ -2,7 +2,12 @@ const conn = require("../db/mongodb");
 exports.createKios = async (req, res) => {
   const event = {
     kios_macaddress: req.body.kios_macaddress,
-    company_id: parseInt(req.body.company_id),
+    kios_name:req.body.kios_name,
+    kios_serailNum:req.body.kios_serailNum,
+    kios_ipaddress:req.body.kios_ipaddress,
+    kios_port:req.body.kios_port,
+    kios_usingfleg:req.body.kios_usingfleg,
+    company_id: req.body.company_id,
   };
   await conn.connect();
   await conn
@@ -26,7 +31,7 @@ exports.getKios = async (req, res) => {
   await conn
     .db("qrpaymnet")
     .collection("kiossetting")
-    .find({ company_id: parseInt(id) })
+    .find({ company_id: id })
     .toArray()
     .then((result) => {
      

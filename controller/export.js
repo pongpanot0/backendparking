@@ -1,4 +1,3 @@
-const db = require("../db/db");
 const moment = require("moment");
 
 const conn = require("../db/mongodb");
@@ -8,7 +7,7 @@ exports.exportparking = async (req, res) => {
   await conn
     .db("qrpaymnet")
     .collection("parkingLogs")
-    .find({ company_id: parseInt(id) })
+    .find({ company_id: id })
     .toArray()
     .then((row) => {
       res.send({
@@ -31,7 +30,7 @@ exports.exportParkExcel = async (req, res) => {
   await conn
     .db("qrpaymnet")
     .collection("parkingLogs")
-    .find({ company_id: parseInt(id) })
+    .find({ company_id: id })
     .toArray()
     .then((row) => {
       const data = [];
@@ -87,7 +86,7 @@ exports.exportSelectDateParkExcel = async (req, res) => {
         $gte: `${parking_start_date_first}`,
         $lt: `${moment(`${parking_start_date_end}`).add(1, "days")}`,
       },
-      company_id: parseInt(id),
+      company_id: id,
     })
     .toArray()
     .then((row) => {
@@ -145,7 +144,7 @@ exports.exportSelectTimeParkExcel = async (req, res) => {
         $gte: `${parking_start_date_first}`,
         $lt: `${parking_start_date_end}`,
       },
-      company_id: parseInt(id),
+      company_id: id,
     })
     .toArray()
     .then((row) => {
@@ -184,4 +183,72 @@ exports.exportSelectTimeParkExcel = async (req, res) => {
       convertJsonToexcel2();
       return;
     });
+};
+const ejs = require("ejs");
+const fs = require("fs");
+const htmlToPdf = require("html-pdf-node");
+const getPrinters = require("pdf-to-printer");
+exports.getPrinters = async (req, res) => {
+  /*   getPrinters.getPrinters().then((result) => {
+    res.send(result);
+  }); */
+};
+
+exports.testpdf = async (req, res) => {
+  const rows = [
+    {
+      Date: "2022-12-15 ",
+      Time: "16:37:52",
+      Qrcode:
+        "https://images.unsplash.com/photo-1661961110144-12ac85918e40?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80",
+    },
+  ];
+  const tableHtml = await ejs.renderFile(
+    "./template/table.html.ejs",
+    { rows: rows },
+    { async: true }
+  );
+  const html = await ejs.renderFile(
+    "./template/layout.html.ejs",
+    { body: tableHtml },
+    { async: true }
+  );
+  let options = {
+    format: "A4",
+    margin: { top: 15, left: 10, right: 10, bottom: 15 },
+  };
+  const options2 = {
+    printer: "Microsoft Print to PDF",
+  };
+  let file = { content: html };
+  htmlToPdf
+    .generatePdf(file, options)
+    .then((pdfBuffer) => {
+      res
+        .writeHead(200, {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": "attachment",
+        })
+        .end(pdfBuffer);
+      fs.writeFileSync("test.pdf", pdfBuffer);
+      getPrinters.print(`./test.pdf`, options2, (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        if (result) {
+          fs.unlink("./test.pdf", function (err) {
+            if (err) return console.log(err);
+            console.log("file deleted successfully");
+          });
+        }
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.send({ success: false, error: err });
+    });
+
+  /*  .catch((err) => {
+      res.send({ success: false, err: err });
+    }); */
 };
