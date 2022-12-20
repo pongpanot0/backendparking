@@ -6,6 +6,6 @@ module.exports = function (app) {
   app.post("/exportSelectDateParkExcel/:id", exportlogs.exportSelectDateParkExcel);
   app.post("/exportSelectTimeParkExcel/:id", exportlogs.exportSelectTimeParkExcel);
   app.get("/testpdf", exportlogs.testpdf);
-  app.get("/getPrinters", exportlogs.getPrinters);
-  
-  }
+  app.post("/ExportParksumcalculator/:id", exportlogs.ExportParksumcalculator);
+  app.post("/ExportParksumcalculatorSelectMouth/:id", exportlogs.ExportParksumcalculatorSelectMouth);
+}

@@ -81,7 +81,7 @@ exports.display = async (req, res) => {
   fs.readFile(`./uploads/${id}`, function (err, data) {
     if (err) throw err; // Fail if the file can't be read.
     else {
-      res.writeHead(200, { "Content-Type": "application/pdf" });
+      res.writeHead(200, { "Content-Type": "image/jpeg" });
       res.end(data); // Send the file data to the browser.
     }
   });

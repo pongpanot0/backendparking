@@ -188,12 +188,142 @@ const ejs = require("ejs");
 const fs = require("fs");
 const htmlToPdf = require("html-pdf-node");
 const getPrinters = require("pdf-to-printer");
-exports.getPrinters = async (req, res) => {
-  /*   getPrinters.getPrinters().then((result) => {
-    res.send(result);
-  }); */
-};
+exports.ExportParksumcalculator = async (req, res) => {
+  const id = req.params.id;
+  const log = await conn
+    .db("qrpaymnet")
+    .collection("parkingLogs")
+    .aggregate([
+      // First Stage
+      {
+        $match: { company_id: id },
+      },
+      {
+        $group: {
+          _id: "$parking_start_mouth",
+          totalSaleAmount: { $sum: { $multiply: ["$totalSum"] } },
+        },
+      },
+      { $sort: { _id: 1 } },
+      // Second Stage
+    ])
+    .toArray()
+    .then((result) => {
+      const data = [];
+      for (let i = 0; i < result.length; i++) {
+        const jsonData = [
+          {
+            ประจำเดือน: result[i]._id,
+            รายได้ทั้งหมด: result[i].totalSaleAmount,
+          },
+        ];
+        data.push(...jsonData);
+      }
+      const convertJsonToexcel2 = () => {
+        const workSheet = XLSX.utils.json_to_sheet(data);
+        const workBook = XLSX.utils.book_new();
 
+        XLSX.utils.book_append_sheet(workBook, workSheet, "HouseData");
+        //binary buffer
+        XLSX.write(workBook, {
+          bookType: "xlsx",
+          type: "buffer",
+        });
+        //binary string
+        const fs = require("fs");
+        const filename = "users.xlsx";
+        const wb_opts = { bookType: "xlsx", type: "binary" }; // workbook options
+        XLSX.writeFile(workBook, filename, wb_opts); // write workbook file
+        const stream = fs.createReadStream(filename); // create read stream
+        stream.on("open", function () {
+          // This just pipes the read stream to the response object (which goes to the client)
+          stream.pipe(res);
+        });
+      };
+      convertJsonToexcel2();
+      return;
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        data: err,
+      });
+    });
+};
+exports.ExportParksumcalculatorSelectMouth = async (req, res) => {
+  const id = req.params.id;
+  const parking_start_mouth = req.body.parking_start_mouth;
+  const parking_start_mouth_end = req.body.parking_start_mouth_end;
+  console.log(req.body);
+  const log = await conn
+    .db("qrpaymnet")
+    .collection("parkingLogs")
+    .aggregate([
+      // First Stage
+      {
+        $match: {
+          company_id: id,
+          parking_start_mouth: {
+            $gte: `${moment(parking_start_mouth).format('yyyy-MM')}`,
+            $lt: `${moment(parking_start_mouth_end)
+              .add(1, "months")
+              .format("yyyy-MM")}`,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$parking_start_mouth",
+          totalSaleAmount: { $sum: { $multiply: ["$totalSum"] } },
+        },
+      },
+      { $sort: { _id: 1 } },
+      // Second Stage
+    ])
+    .toArray()
+    .then((result) => {
+      console.log(result);
+      const data = [];
+      for (let i = 0; i < result.length; i++) {
+        const jsonData = [
+          {
+            ประจำเดือน: result[i]._id,
+            รายได้ทั้งหมด: result[i].totalSaleAmount,
+          },
+        ];
+        data.push(...jsonData);
+      }
+      const convertJsonToexcel2 = () => {
+        const workSheet = XLSX.utils.json_to_sheet(data);
+        const workBook = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(workBook, workSheet, "HouseData");
+        //binary buffer
+        XLSX.write(workBook, {
+          bookType: "xlsx",
+          type: "buffer",
+        });
+        //binary string
+        const fs = require("fs");
+        const filename = "users.xlsx";
+        const wb_opts = { bookType: "xlsx", type: "binary" }; // workbook options
+        XLSX.writeFile(workBook, filename, wb_opts); // write workbook file
+        const stream = fs.createReadStream(filename); // create read stream
+        stream.on("open", function () {
+          // This just pipes the read stream to the response object (which goes to the client)
+          stream.pipe(res);
+        });
+      };
+      convertJsonToexcel2();
+      return;
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        data: err,
+      });
+    });
+};
 exports.testpdf = async (req, res) => {
   const rows = [
     {

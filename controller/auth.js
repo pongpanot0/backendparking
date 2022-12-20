@@ -79,16 +79,21 @@ exports.login = async (req, res) => {
     .find({ user_name: user_name })
     .toArray()
     .then(async (result) => {
-      console.log('====================================');
       console.log(result);
-      console.log('====================================');
-      if (result[0] == [] || result[0] == null) {
+      if (result == [] || result == null || result == "") {
+        res.send({
+          data: 400,
+          result: "ชื่อหรือรหัสผ่านผิด",
+        })
+        return;
+      }
+      if (result[0] == [] || result[0] == null || result[0] == "") {
         res.send({
           data: 400,
           result: "มีUsername อยุ่แล้ว",
         });
       }
-      if (result[0] !== [] || result[0] !== null) {
+      if (result[0] !== [] || result[0] !== null || result[0] !== '') {
         bcrypt.compare(
           req.body.user_password,
           result[0]["user_password"],
@@ -105,21 +110,15 @@ exports.login = async (req, res) => {
                   user_name: result[0].user_name,
                   company_id: result[0].company_id,
                 },
-                "zuHbAry/7IrrSQaynzj4c8i8n1iO+CCqzdyeXgRNlfDdQBUJcX9yrYGc98fqp169/ELDSLwtvzebeQ0nf6WkOiXUhOdStRMhPykd/nJwEdmENXThvX9Map7k1gwvXvciZ48DYVc7nntfN82k+ZXSRX2+rTN8YEK3S7tP/0csBYdQwB6OS5FzMHM1gQvK3VX4QAlC6nDbvLsYOBqZcYsDlvlL/Uglw57wNNpLfwjQQC+zXBFvGnROVNLh//yyBl1kB+YmIZXrnkrUkNbLm7QteW+6nXUWZ1gQOEatjCr9NnYxaY4Ve0QABq0sHzifZ65Bz4HVFptun97VS4LSTJmxeQ==",
-                
+                "zuHbAry/7IrrSQaynzj4c8i8n1iO+CCqzdyeXgRNlfDdQBUJcX9yrYGc98fqp169/ELDSLwtvzebeQ0nf6WkOiXUhOdStRMhPykd/nJwEdmENXThvX9Map7k1gwvXvciZ48DYVc7nntfN82k+ZXSRX2+rTN8YEK3S7tP/0csBYdQwB6OS5FzMHM1gQvK3VX4QAlC6nDbvLsYOBqZcYsDlvlL/Uglw57wNNpLfwjQQC+zXBFvGnROVNLh//yyBl1kB+YmIZXrnkrUkNbLm7QteW+6nXUWZ1gQOEatjCr9NnYxaY4Ve0QABq0sHzifZ65Bz4HVFptun97VS4LSTJmxeQ=="
               );
-            
+
               res.send({
                 status: 200,
                 name: result[0].user_name,
-                email:result[0].user_name,
+                email: result[0].user_name,
                 accessToken: token,
                 user: result,
-              });
-            } else {
-              return res.send({
-                status: 400,
-                message: "ชื่อหรือรหัสผ่านไม่ถูกต้อง",
               });
             }
           }
