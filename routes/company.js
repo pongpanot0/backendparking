@@ -5,5 +5,5 @@ module.exports = function (app) {
   app.post("/company/update/:id", company.update);
   app.post("/company/updatePic/:id", company.updatePic);
   app.get('/display/:id',company.display)
-  
+  app.get('/displayPDF/:id',company.displayPDF)
   }

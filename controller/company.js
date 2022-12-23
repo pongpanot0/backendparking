@@ -86,3 +86,13 @@ exports.display = async (req, res) => {
     }
   });
 };
+exports.displayPDF = async (req, res) => {
+  const id = req.params.id;
+  fs.readFile(`./uploads/${id}`, function (err, data) {
+    if (err) throw err; // Fail if the file can't be read.
+    else {
+      res.writeHead(200, { "Content-Type": "application/pdf" });
+      res.end(data); // Send the file data to the browser.
+    }
+  });
+};
