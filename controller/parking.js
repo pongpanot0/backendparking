@@ -1,7 +1,6 @@
-const db = require("../db/db");
 const moment = require("moment");
 const { v4: uuidv4 } = require("uuid");
-const axios = require('axios')
+const axios = require("axios");
 const QRcode = require("qrcode");
 
 function loopGetLadderTimeRate(ds, min2) {
@@ -54,17 +53,16 @@ const url = require("url");
 const conn = require("../db/mongodb");
 exports.createParkLog = async (req, res) => {
   console.log(req.body[0]["SN"]);
-  company_id = []
+  company_id = [];
   await conn.connect();
   await conn
     .db("qrpaymnet")
     .collection("kiossetting")
     .find({ kios_serailNum: "253203810" })
     .toArray()
-    .then((result)=>{
-      company_id.push(result[0].company_id)
-    
-    })
+    .then((result) => {
+      company_id.push(result[0].company_id);
+    });
   const event = {
     parking_start: moment(new Date()).format("yyyy-MM-DD HH:mm:ss"),
     parking_uuids: uuidv4(),
@@ -112,7 +110,7 @@ exports.createParkLog = async (req, res) => {
                   method: "远程开门",
                   params: [
                     {
-                      设备序列号:req.body[0]["SN"],
+                      设备序列号: req.body[0]["SN"],
                       门号: 1,
                     },
                   ],
@@ -124,9 +122,9 @@ exports.createParkLog = async (req, res) => {
                   data: data,
                 }).then((res) => {
                   console.log(res.data);
-                  return
+                  return;
                 });
-             /*    res.send(result); */
+                /*    res.send(result); */
               });
           }
         });
@@ -138,6 +136,7 @@ exports.parkcalculate2 = async (req, res) => {
   const parking_logs_id = req.params.parking_logs_id;
   await conn.connect();
   const end = moment(new Date()).format("yyyy-MM-DD HH:mm:ss");
+
   const log = await conn
     .db("qrpaymnet")
     .collection("parkingLogs")
@@ -198,6 +197,59 @@ exports.parkcalculate2 = async (req, res) => {
     })
     .catch((err) => {
       console.log(err);
+    })
+    .finally((es) => {
+      setTimeout(async function () {
+        const log = await conn
+          .db("qrpaymnet")
+          .collection("parkingLogs")
+          .find({ parking_uuids: parking_logs_id })
+          .toArray()
+          .then(async (result) => {
+            if (result[0].out == 0 && result[0].paid == 1) {
+              const lineNotify = require("line-notify-nodejs")(
+                "n7XJ8s06pxupAvKm5RpVtLQqPuYKnVtHb35iLOYzNSg"
+              );
+
+              lineNotify
+                .notify({
+                  message: "send test",
+                })
+                .then(() => {
+                  console.log("send completed!");
+                });
+              console.log("update");
+              const end = moment(new Date()).format("yyyy-MM-DD HH:mm:ss");
+              const log = await conn
+                .db("qrpaymnet")
+                .collection("parkingLogs")
+                .updateOne(
+                  { parking_uuids: parking_logs_id },
+                  {
+                    $set: {
+                      parking_end2: end,
+                      totalSum: firstvalue[0],
+                    },
+                  },
+                  {
+                    $add: {
+                      firstvalue: 50,
+                    },
+                  }
+                )
+                .then(async (result) => {})
+                .catch((err) => {
+                  console.log(err);
+                });
+            }
+            if (result[0].out == 1 && result[0].paid == 1) {
+              console.log("555");
+              return;
+            } else {
+              return;
+            }
+          });
+      }, time[0] * 60);
     });
 };
 exports.testgetpark = async (req, res) => {

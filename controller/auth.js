@@ -1,4 +1,4 @@
-const db = require("../db/db");
+
 const bcrypt = require("bcryptjs");
 const conn = require("../db/mongodb");
 const jwt = require("jsonwebtoken");

@@ -254,7 +254,6 @@ exports.ExportParksumcalculatorSelectMouth = async (req, res) => {
   const id = req.params.id;
   const parking_start_mouth = req.body.parking_start_mouth;
   const parking_start_mouth_end = req.body.parking_start_mouth_end;
-  console.log(req.body);
   const log = await conn
     .db("qrpaymnet")
     .collection("parkingLogs")

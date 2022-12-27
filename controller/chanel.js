@@ -1,4 +1,4 @@
-const db = require("../db/db");
+
 const conn = require("../db/mongodb");
 exports.createChanel = async (req, res) => {
   const event = {

@@ -1,4 +1,4 @@
-const db = require("../db/db");
+
 const conn = require("../db/mongodb");
 async function insertsettingpayment(req, res) {
   const event = {

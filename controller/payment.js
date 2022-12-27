@@ -1,6 +1,3 @@
-const db = require("../db/db");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const generatePayload = require("promptpay-qr");
 const promptpay = require("promptpay-js");
 const _ = require("lodash");
