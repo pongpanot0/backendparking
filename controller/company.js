@@ -3,14 +3,12 @@ const { ObjectId } = require("mongodb");
 const conn = require("../db/mongodb");
 exports.get = async (req, res) => {
   const id = req.params.id;
-  console.log(id);
   const log = await conn
     .db("qrpaymnet")
     .collection("company")
     .find({ _id: ObjectId(id)  })
     .toArray()
     .then(async (result) => {
-      console.log(result);
       res.send({
         status: 200,
         data: result,
@@ -23,6 +21,7 @@ exports.get = async (req, res) => {
 
 exports.update = async (req, res) => {
   const id = req.params.id;
+
   const company_name = req.body.company_name;
   const company_lots = req.body.company_lots;
   const timeReamain = parseInt(req.body.timeReamain);
