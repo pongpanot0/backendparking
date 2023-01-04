@@ -1,6 +1,6 @@
 const conn = require("../db/mongodb");
 const moment = require("moment");
-const { ObjectId } = require("mongodb");
+const { ObjectId, ObjectID } = require("mongodb");
 
 exports.createShop = async (req, res) => {
   const event = {
@@ -197,6 +197,27 @@ exports.getshopgroup = async (req, res) => {
           as: "shop",
         },
       },
+    ])
+    .toArray()
+    .then((row) => {
+      res.send({
+        status: 200,
+        data: row,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+exports.getshopgroupid = async (req, res) => {
+  const id = req.params.id;
+  await conn.connect();
+  await conn
+    .db("qrpaymnet")
+    .collection("shopgroup")
+    .aggregate([
+      { $match: { _id: ObjectID(id) } },
+
     ])
     .toArray()
     .then((row) => {
