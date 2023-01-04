@@ -8,5 +8,5 @@ module.exports = function (app) {
   app.post("/shopgroup", shop.shopgroup);
   app.get("/getshopgroup/:id", shop.getshopgroup);
   app.get("/getShopnull/:id", shop.getShopnull);
-  app.get("/getshopgroup/:id", shop.getshopgroup);
+  app.get("/getshopgroupid/:id", shop.getshopgroupid);
 };
