@@ -136,9 +136,7 @@ exports.shopgroup = async (req, res) => {
   console.log(req.body);
   const event = {
     shopgroupname: req.body.shopgroupname,
-    estampuuid: {
-      id: req.body.targetKeys,
-    },
+    estampuuid: req.body.estampuuid,
     company_id: req.body.company_id,
     created_by: req.body.user_id,
     created_at: moment(new Date()).format("DD-MM-yyyy"),
@@ -217,7 +215,7 @@ exports.getshopgroup = async (req, res) => {
       {
         $project: {
           _id: 1,
-          "estampuuid": {
+          estampuuid: {
             $map: {
               input: "$estampuuid",
               as: "prod",
