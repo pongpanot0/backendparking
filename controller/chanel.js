@@ -120,7 +120,7 @@ exports.getChanelPaymentsid = async (req, res) => {
           //search query with our [searchId] value
           pipeline: [
             //searching [searchId] value equals your field [_id]
-            { $match: { $expr: [{ _id: "$$searchId" }] } },
+            { $match: { $expr: [{ $eq: ["$_id", "$$searchId"] }] } },
             //projecting only fields you reaaly need, otherwise you will store all - huge data loads
           ],
 

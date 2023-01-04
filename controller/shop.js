@@ -53,7 +53,7 @@ exports.getShopnull = async (req, res) => {
   await conn
     .db("qrpaymnet")
     .collection("shop")
-    .find({ company_id: id, inactive: 0, shopgroup:null })
+    .find({ company_id: id, inactive: 0, shopgroup: null })
     .toArray()
     .then((row) => {
       res.send({
@@ -132,10 +132,13 @@ exports.Editshop = async (req, res) => {
     });
 };
 
-exports.shopgroup = async (req, res) =>  {
+exports.shopgroup = async (req, res) => {
+  console.log(req.body);
   const event = {
     shopgroupname: req.body.shopgroupname,
-    estampuuid: req.body.estampuuid,
+    estampuuid: {
+      id: req.body.targetKeys,
+    },
     company_id: req.body.company_id,
     created_by: req.body.user_id,
     created_at: moment(new Date()).format("DD-MM-yyyy"),
@@ -178,6 +181,7 @@ exports.shopgroup = async (req, res) =>  {
           status: 200,
           data: result,
         });
+        return;
       }
     });
 };
@@ -188,13 +192,53 @@ exports.getshopgroup = async (req, res) => {
     .db("qrpaymnet")
     .collection("shopgroup")
     .aggregate([
-      { $match: { company_id: id } },
+      { $match: { _id: ObjectID(id) } },
       {
         $lookup: {
-          from: "shop",
-          localField: "_id",
-          foreignField: "shopgroup",
-          as: "shop",
+          from: "estamp",
+          localField: "estampuuid._id",
+          foreignField: "_id",
+          as: "productDetails",
+        },
+      },
+      {
+        $addFields: {
+          productDetails: {
+            $map: {
+              input: "$productDetails",
+              in: {
+                _id: "$$this._id",
+                name: "$$this.shopgroupname",
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          "estampuuid": {
+            $map: {
+              input: "$estampuuid",
+              as: "prod",
+              in: {
+                $mergeObjects: [
+                  "$$prod",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$productDetails",
+                          cond: { $eq: ["$$this._id", "$$prod._id"] },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
         },
       },
     ])
@@ -215,10 +259,7 @@ exports.getshopgroupid = async (req, res) => {
   await conn
     .db("qrpaymnet")
     .collection("shopgroup")
-    .aggregate([
-      { $match: { _id: ObjectID(id) } },
-
-    ])
+    .aggregate([{ $match: { _id: ObjectID(id) } }])
     .toArray()
     .then((row) => {
       res.send({
