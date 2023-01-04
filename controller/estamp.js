@@ -1,7 +1,7 @@
 const conn = require("../db/mongodb");
 const moment = require("moment");
 var shortid = require("shortid");
-const { ObjectId } = require("mongodb");
+const { ObjectId, ObjectID } = require("mongodb");
 exports.editEstamp = async (req, res) => {
   const id = req.params.id;
   console.log(req.body);
@@ -28,7 +28,6 @@ exports.editEstamp = async (req, res) => {
       console.log(err);
     })
     .finally(async (turn) => {
-      console.log(data);
       await conn.connect();
       await conn
         .db("qrpaymnet")
@@ -166,6 +165,46 @@ exports.delteEstamp = async (req, res) => {
         console.log(err);
       });
   });
-  console.log(data);
   res.send(data);
+};
+exports.useEstamp = async (req, res) => {
+  const parking_uuids = req.params.parking_uuids;
+  const estamp_id = req.body.estamp_id;
+  await conn.connect();
+  await conn
+    .db("qrpaymnet")
+    .collection("parkingLogs")
+    .find({ parking_uuids: parking_uuids })
+    .toArray()
+    .then(async (rec) => {
+      const total = rec[0].totalSum;
+      await conn.connect();
+      await conn
+        .db("qrpaymnet")
+        .collection("estamp")
+        .find({ _id: ObjectID(estamp_id) })
+        .toArray()
+        .then(async (result) => {
+          const estamptotal = result[0].estamp_total;
+          const totalsum = total - estamptotal;
+          await conn.connect();
+          await conn
+            .db("qrpaymnet")
+            .collection("parkingLogs")
+            .updateOne(
+              { parking_uuids: parking_uuids },
+              {
+                $set: {
+                  totalSum: totalsum,
+                },
+              }
+            )
+            .then((row) => {
+              res.send({ data: row });
+            });
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
