@@ -8,6 +8,8 @@ app.use(bodyParser.json());
 const cors = require("cors");
 app.use(cors({ origin: "*" }));
 const path = require("path");
+const swaggerUi = require("swagger-ui-express");
+const swaggerFile = require("./swagger_output.json");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

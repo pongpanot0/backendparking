@@ -1,0 +1,1051 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "title": "My API",
+      "description": "Description",
+      "version": "1.0.0"
+    },
+    "host": "119.59.97.193:7200",
+    "basePath": "/",
+    "schemes": [
+      "http"
+    ],
+    "paths": {
+      "/register": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "example": "any"
+                  },
+                  "first_name": {
+                    "example": "any"
+                  },
+                  "last_name": {
+                    "example": "any"
+                  },
+                  "email": {
+                    "example": "any"
+                  },
+                  "position": {
+                    "example": "any"
+                  },
+                  "password": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/login": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "example": "any"
+                  },
+                  "password": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            },
+            "401": {
+              "description": "Unauthorized"
+            }
+          }
+        }
+      },
+      "/createbuild/{company_id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "example": "any"
+                  },
+                  "code": {
+                    "example": "any"
+                  },
+                  "create_by": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getbuild/{company_id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getonebuildunit/{company_id}/{uuids}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "uuids",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/deletebuilding/{id}/{uuid}": {
+        "delete": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "uuid",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/exportsBuilding/{company_id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {}
+        }
+      },
+      "/exportsBuilding2query/{company_id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getcommunity/{company_id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getdevice": {
+        "get": {
+          "description": "",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/opendoorwithapp": {
+        "get": {
+          "description": "",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/createqrcodevisitor": {
+        "get": {
+          "description": "",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/createqrcodeemployee": {
+        "get": {
+          "description": "",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/createRoom/{company_id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "room_buildingUuid": {
+                    "example": "any"
+                  },
+                  "room_name": {
+                    "example": "any"
+                  },
+                  "code": {
+                    "example": "any"
+                  },
+                  "created_by": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getRoom/{company_id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/deleteroom/{company_id}/{uuids}": {
+        "delete": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "uuids",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getoneRoom/{company_id}/{uuids}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "uuids",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/exportsRoom/{company_id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {}
+        }
+      },
+      "/getdeviceuuid/{company_id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getdeviceuuidmobile/{company_id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/createdevice/{company_id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "create_by": {
+                    "example": "any"
+                  },
+                  "devSn": {
+                    "example": "any"
+                  },
+                  "name": {
+                    "example": "any"
+                  },
+                  "positionuuids": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/removeDevice/{company_id}/{devSn}": {
+        "delete": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "devSn",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getDevice/{company_id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getDeviceLenght/{company_id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/openDevice/{company_id}/{devSn}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "devSn",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/ConfigDevice/{company_id}/{devSn}/{devAccSupperPassword}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "devSn",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "devAccSupperPassword",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getLogDevice/{company_id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/exportslogdevice/{company_id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/creategroupdevice/{company_id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "targetKeys": {
+                    "example": "any"
+                  },
+                  "targetKeys2": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {}
+        }
+      },
+      "/getdevicegroup/{id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getdevicegroupcompanyid/{id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/deletepermisiion/{id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "moveKeys": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {}
+        }
+      },
+      "/addpermision": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "example": "any"
+                  },
+                  "targetKeys": {
+                    "example": "any"
+                  },
+                  "targetKeys2": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {}
+        }
+      },
+      "/deletepermisiionuser/{id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "moveKeys": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {}
+        }
+      },
+      "/removemanyDevice/{company_id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/exportslogdevicewithdate/{company_id}/{startDateTime}/{endDateTime}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "startDateTime",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "endDateTime",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/restartDevice/{company_id}/{devSn}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "devSn",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/editDevice/{id}/{company_id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "device_name": {
+                    "example": "any"
+                  },
+                  "positionuuids": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getoneDevice/{id}/{company_id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "company_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/createVisitor/{id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "devsns": {
+                    "example": "any"
+                  },
+                  "usableCount": {
+                    "example": "any"
+                  },
+                  "startDate": {
+                    "example": "any"
+                  },
+                  "endDate": {
+                    "example": "any"
+                  },
+                  "tel_visitor": {
+                    "example": "any"
+                  },
+                  "visitor_name": {
+                    "example": "any"
+                  },
+                  "visipeople": {
+                    "example": "any"
+                  },
+                  "created_by": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getVisitor/{id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getVisitorbyuser/{id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/getVisitorId/{id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/exportsvisitor/{id}": {
+        "post": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {}
+        }
+      },
+      "/getVisitorlenght/{id}": {
+        "get": {
+          "description": "",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      }
+    }
+  }
