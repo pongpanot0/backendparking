@@ -12,7 +12,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerFile = require("./swagger_output.json");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 var filePath = path.join(__dirname, "/uploads/").split("%20").join(" ");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
