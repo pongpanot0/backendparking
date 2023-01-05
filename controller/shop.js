@@ -1,9 +1,68 @@
 const conn = require("../db/mongodb");
+const bcrypt = require("bcryptjs");
 const moment = require("moment");
 const { ObjectId, ObjectID } = require("mongodb");
+var shortid = require("shortid");
+shortid.characters(
+  "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@"
+);
+async function insertAuth(req, res) {
+  await conn.connect();
+  await conn
+    .db("qrpaymnet")
+    .collection("users")
+    .find({ user_name: req.user.username })
+    .count()
+    .then(async (result) => {
+      console.log(result);
+      if (result > 0) {
+        res.send({
+          data: 400,
+          result: "มีUsername อยุ่แล้ว",
+        });
+      }
+      if (result <= 0) {
+        bcrypt.hash(req.user.password, 10, async (err, hash) => {
+          if (err) {
+            console.log(err);
+          }
+          if (hash) {
+            const event = {
+              user_name: req.user.username,
+              password: req.user.password,
+              created_by: req.data.user_id,
+              created_at: moment(new Date()).format("YYYY-MM-DD HH:mm"),
+              company_id: req.data.company_id,
+              user_password: hash,
+              shopname: req.data.shopname,
+              shopid: req.id,
+            };
 
+            await conn
+              .db("qrpaymnet")
+              .collection("users")
+              .insertOne(event, async (err, result) => {
+                if (err) {
+                  console.log(err);
+                }
+                if (result) {
+                  return {
+                    status: 200,
+                    data: result,
+                  };
+                }
+              });
+          }
+        });
+      }
+    });
+}
 exports.createShop = async (req, res) => {
+  const username = shortid.generate();
+  const password = shortid.generate();
   const event = {
+    username: username,
+    password: password,
     shopname: req.body.shopname,
     shopdetail: req.body.shopdetail,
     company_id: req.body.company_id,
@@ -24,6 +83,11 @@ exports.createShop = async (req, res) => {
       if (result) {
         res.send({
           status: 200,
+          resc: insertAuth({
+            data: req.body,
+            id: result.insertedId,
+            user: { username, password },
+          }),
           data: result,
         });
       }
@@ -169,7 +233,25 @@ exports.shopgroup = async (req, res) => {
               }
             )
             .then((rec) => {
-              return;
+              objectArray.forEach(async ([key, value]) => {
+                const log = await conn
+                  .db("qrpaymnet")
+                  .collection("users")
+                  .updateMany(
+                    { shopid: ObjectId(value) },
+                    {
+                      $set: {
+                        shop_group_id: result.insertedId,
+                      },
+                    }
+                  )
+                  .then((rec) => {
+                    return;
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                  });
+              });
             })
             .catch((err) => {
               console.log(err);
