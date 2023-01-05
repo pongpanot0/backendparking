@@ -168,7 +168,7 @@ exports.delteEstamp = async (req, res) => {
   res.send(data);
 };
 exports.useEstamp = async (req, res) => {
-  const parking_uuids = req.params.parking_uuids;
+  const parking_uuids = req.body.parking_uuids;
   const estamp_id = req.body.estamp_id;
   await conn.connect();
   await conn

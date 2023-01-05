@@ -9,4 +9,6 @@ module.exports = function (app) {
   app.get("/getshopgroup/:id", shop.getshopgroup);
   app.get("/getShopnull/:id", shop.getShopnull);
   app.get("/getshopgroupid/:id", shop.getshopgroupid);
+  app.get("/getshopgroupidjoint/:id", shop.getshopgroupidJoint);
+  
 };

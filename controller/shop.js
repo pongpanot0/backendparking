@@ -29,6 +29,7 @@ exports.createShop = async (req, res) => {
       }
     });
 };
+
 exports.getShop = async (req, res) => {
   const id = req.params.id;
   await conn.connect();
@@ -133,7 +134,6 @@ exports.Editshop = async (req, res) => {
 };
 
 exports.shopgroup = async (req, res) => {
-  console.log(req.body);
   const event = {
     shopgroupname: req.body.shopgroupname,
     estampuuid: req.body.estampuuid,
@@ -144,7 +144,7 @@ exports.shopgroup = async (req, res) => {
     updated_at: moment(new Date()).format("DD-MM-yyyy"),
     inactive: 0,
   };
-
+  console.log(req.body);
   await conn.connect();
   await conn
     .db("qrpaymnet")
@@ -169,7 +169,7 @@ exports.shopgroup = async (req, res) => {
               }
             )
             .then((rec) => {
-              console.log(rec);
+              return;
             })
             .catch((err) => {
               console.log(err);
@@ -179,11 +179,56 @@ exports.shopgroup = async (req, res) => {
           status: 200,
           data: result,
         });
-        return;
       }
     });
 };
 exports.getshopgroup = async (req, res) => {
+  const id = req.params.id;
+  await conn.connect();
+  await conn
+    .db("qrpaymnet")
+    .collection("shopgroup")
+    .aggregate([
+      { $match: { company_id: id } },
+      {
+        $lookup: {
+          from: "shop",
+          localField: "_id",
+          foreignField: "shopgroup",
+          as: "shop",
+        },
+      },
+    ])
+    .toArray()
+    .then((row) => {
+      res.send({
+        status: 200,
+        data: row,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+exports.getshopgroupid = async (req, res) => {
+  const id = req.params.id;
+  await conn.connect();
+  await conn
+    .db("qrpaymnet")
+    .collection("shopgroup")
+    .find({ _id: ObjectID(id) })
+    .toArray()
+    .then((row) => {
+      res.send({
+        status: 200,
+        data: row,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+exports.getshopgroupidJoint = async (req, res) => {
   const id = req.params.id;
   await conn.connect();
   await conn
@@ -240,24 +285,6 @@ exports.getshopgroup = async (req, res) => {
         },
       },
     ])
-    .toArray()
-    .then((row) => {
-      res.send({
-        status: 200,
-        data: row,
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-};
-exports.getshopgroupid = async (req, res) => {
-  const id = req.params.id;
-  await conn.connect();
-  await conn
-    .db("qrpaymnet")
-    .collection("shopgroup")
-    .aggregate([{ $match: { _id: ObjectID(id) } }])
     .toArray()
     .then((row) => {
       res.send({
